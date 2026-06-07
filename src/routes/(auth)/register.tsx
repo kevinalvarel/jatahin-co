@@ -1,5 +1,5 @@
 import LiquidChrome from '#/components/animated/liquid-chrome'
-import { SignupForm } from '#/components/signup-form'
+import { SignupForm } from '#/components/auth/signup-form'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(auth)/register')({
@@ -11,7 +11,8 @@ function RouteComponent() {
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
+          <a href="/" className="flex items-center gap-2 font-medium">
+            <img src="/logo.png" width={25} height={25} />
             Jatahin
           </a>
         </div>
