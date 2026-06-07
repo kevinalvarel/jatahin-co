@@ -19,6 +19,9 @@ export const budgets = pgTable('budgets', {
     .references(() => user.id, { onDelete: 'cascade' }),
   dailyLimit: numeric('daily_limit', { precision: 12, scale: 2 }).notNull(),
   currency: varchar('currency', { length: 3 }).default('IDR'),
+  financialGoal: varchar('financial_goal', { length: 20 }).notNull(), // aggressive | balanced | relaxed
+  incomeType: varchar('income_type', { length: 20 }).notNull(), // monthly | freelance | daily
+  priorityCategories: text('priority_categories').array().notNull(), // ["makan", "transport"]
   startDate: date('start_date').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
@@ -58,3 +61,11 @@ export const dailySummaries = pgTable(
     unq: unique().on(t.userId, t.date),
   }),
 )
+
+export const remainingBudget = pgTable('remaining_budget', {
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  date: date('date').notNull(),
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+})

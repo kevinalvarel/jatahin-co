@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       {
         title: 'Jatahin',
         description:
-          'Jatahin adalah sebuah platform yang dapat mengatur keuangan mu',
+          'Aplikasi penghitung jatah pengeluaran harian agar keuangan tetap terkontrol. Dibangun dengan Tanstack Start yang cepat dan type-safe.',
       },
     ],
     links: [

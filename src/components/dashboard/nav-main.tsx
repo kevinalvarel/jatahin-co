@@ -1,13 +1,17 @@
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
+'use client'
 
-import { Button } from "#/components/ui/button.tsx"
+import * as React from 'react'
+import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react'
+
+import { BudgetModal } from '#/components/dashboard/budget-modal'
+import { Button } from '#/components/ui/button.tsx'
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "#/components/ui/sidebar.tsx"
+} from '#/components/ui/sidebar.tsx'
 
 export function NavMain({
   items,
@@ -18,17 +22,20 @@ export function NavMain({
     icon?: Icon
   }[]
 }) {
+  const [budgetModalOpen, setBudgetModalOpen] = React.useState(false)
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Create"
+              tooltip="Buat Budget"
+              onClick={() => setBudgetModalOpen(true)}
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
             >
               <IconCirclePlusFilled />
-              <span>Quick Create</span>
+              <span>Buat Budget</span>
             </SidebarMenuButton>
             <Button
               size="icon"
@@ -51,6 +58,8 @@ export function NavMain({
           ))}
         </SidebarMenu>
       </SidebarGroupContent>
+
+      <BudgetModal open={budgetModalOpen} onOpenChange={setBudgetModalOpen} />
     </SidebarGroup>
   )
 }
