@@ -50,19 +50,14 @@ const data = {
   ],
   documents: [
     {
-      name: 'Data Library',
+      name: 'History Pengeluaran',
       url: '#',
       icon: IconDatabase,
     },
     {
-      name: 'Reports',
+      name: 'History Anggaran',
       url: '#',
       icon: IconReport,
-    },
-    {
-      name: 'Word Assistant',
-      url: '#',
-      icon: IconFileWord,
     },
   ],
 }

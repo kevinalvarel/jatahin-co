@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react'
 
-import { BudgetModal } from '#/components/dashboard/budget-modal'
+import { BudgetModal } from '#/components/dashboard/modals/budget-modal'
 import { Button } from '#/components/ui/button.tsx'
 import {
   SidebarGroup,

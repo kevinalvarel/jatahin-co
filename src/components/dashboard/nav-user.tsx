@@ -23,9 +23,9 @@ import {
   useSidebar,
 } from '#/components/ui/sidebar.tsx'
 import { authClient } from '#/lib/auth-client'
-import { redirect } from '@tanstack/react-router'
 
-export async function NavUser({
+
+export function NavUser({
   user,
 }: {
   user: {
@@ -39,7 +39,7 @@ export async function NavUser({
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          redirect({ to: '/login' })
+          window.location.href = '/login'
         },
       },
     })

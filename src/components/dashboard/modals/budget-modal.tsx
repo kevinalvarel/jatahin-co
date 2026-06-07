@@ -4,12 +4,14 @@ import * as React from 'react'
 import {
   IconCalendar,
   IconCoinFilled,
+  IconLoader2,
   IconScale,
-  IconScaleFilled,
   IconSparkles,
   IconTarget,
   IconWallet,
 } from '@tabler/icons-react'
+import { useRouter } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 import { Button } from '#/components/ui/button.tsx'
 import { Checkbox } from '#/components/ui/checkbox.tsx'
@@ -47,12 +49,13 @@ import {
   Gamepad,
   Laptop,
   Package,
-  Scale,
   ShoppingBag,
   Stethoscope,
   TreePalm,
   UtensilsCrossed,
 } from 'lucide-react'
+
+import { createBudget } from '#/server/budget'
 
 const FINANCIAL_GOALS = [
   { value: 'aggressive', label: 'Hemat', emoji: <Flame /> },
@@ -82,6 +85,7 @@ interface BudgetModalProps {
 }
 
 export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
+  const router = useRouter()
   const [dailyLimit, setDailyLimit] = React.useState('')
   const [startDate, setStartDate] = React.useState('')
   const [financialGoal, setFinancialGoal] = React.useState('balanced')
@@ -90,6 +94,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
     'makan',
     'transport',
   ])
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   function handleCategoryToggle(category: string) {
     setPriorityCategories((prev) =>
@@ -110,17 +115,39 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
     setDailyLimit(raw)
   }
 
-  function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
-    const payload = {
-      dailyLimit,
-      startDate,
-      financialGoal,
-      incomeType,
-      priorityCategories,
+
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
+    try {
+      await createBudget({
+        data: {
+          dailyLimit,
+          startDate,
+          financialGoal: financialGoal as 'aggressive' | 'balanced' | 'relaxed',
+          incomeType: incomeType as 'monthly' | 'freelance' | 'daily',
+          priorityCategories,
+        },
+      })
+
+      toast.success('Budget berhasil disimpan!', {
+        description: `Budget Rp ${formatCurrency(dailyLimit)} mulai berlaku ${startDate}`,
+      })
+
+      handleReset()
+      onOpenChange(false)
+
+      // Refresh route data so dashboard cards show updated budget
+      router.invalidate()
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Gagal menyimpan budget'
+      toast.error('Gagal menyimpan budget', { description: message })
+    } finally {
+      setIsSubmitting(false)
     }
-    console.log('Budget payload:', payload)
-    onOpenChange(false)
   }
 
   function handleReset() {
@@ -177,6 +204,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                     onChange={handleBudgetChange}
                     inputMode="numeric"
                     required
+                    disabled={isSubmitting}
                   />
                 </InputGroup>
                 <FieldDescription>
@@ -197,6 +225,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     required
+                    disabled={isSubmitting}
                   />
                 </InputGroup>
               </Field>
@@ -220,6 +249,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                   variant="outline"
                   spacing={2}
                   className="flex-wrap"
+                  disabled={isSubmitting}
                 >
                   {FINANCIAL_GOALS.map((goal) => (
                     <ToggleGroupItem
@@ -250,6 +280,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                   variant="outline"
                   spacing={2}
                   className="flex-wrap"
+                  disabled={isSubmitting}
                 >
                   {INCOME_TYPES.map((type) => (
                     <ToggleGroupItem
@@ -286,6 +317,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                             onCheckedChange={() =>
                               handleCategoryToggle(cat.value)
                             }
+                            disabled={isSubmitting}
                           />
                           <span>{cat.emoji}</span>
                           <span className="font-medium">{cat.label}</span>
@@ -307,6 +339,7 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
               variant="ghost"
               onClick={handleReset}
               className="mr-auto text-muted-foreground"
+              disabled={isSubmitting}
             >
               Reset
             </Button>
@@ -314,12 +347,20 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
             >
               Batal
             </Button>
-            <Button type="submit" form="budget-form">
-              <IconWallet data-icon="inline-start" />
-              Simpan Budget
+            <Button type="submit" form="budget-form" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <IconLoader2
+                  className="animate-spin"
+                  data-icon="inline-start"
+                />
+              ) : (
+                <IconWallet data-icon="inline-start" />
+              )}
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Budget'}
             </Button>
           </DialogFooter>
         </form>
