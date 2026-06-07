@@ -1,7 +1,8 @@
-import { LoginForm } from '#/components/login-form'
+import LiquidChrome from '#/components/animated/liquid-chrome'
+import { SignupForm } from '#/components/signup-form'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute('/(auth)/register')({
   component: RouteComponent,
 })
 
@@ -16,15 +17,18 @@ function RouteComponent() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm />
+            <SignupForm />
           </div>
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
-          src="/placeholder.svg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        <LiquidChrome
+          baseColor={[
+            0.6784313725490196, 0.6941176470588235, 0.7098039215686275,
+          ]}
+          speed={0.3}
+          amplitude={0.3}
+          interactive
         />
       </div>
     </div>

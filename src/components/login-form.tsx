@@ -13,7 +13,7 @@ import { useForm } from '@tanstack/react-form'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import { authClient } from '#/lib/auth-client'
-import { Github } from 'lucide-react'
+import { Github, Loader2 } from 'lucide-react'
 
 const formSchema = z.object({
   email: z.email('Email tidak sesuai'),
@@ -77,15 +77,21 @@ export function LoginForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="m@example.com"
-                  autoComplete="off"
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="m@example.com"
+                      autoComplete="off"
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -100,15 +106,21 @@ export function LoginForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  autoComplete="off"
-                  type="password"
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                      type="password"
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -116,18 +128,34 @@ export function LoginForm({
           }}
         />
         <Field>
-          <Button type="submit">Login</Button>
+          <form.Subscribe
+            selector={(state) => state.isSubmitting}
+            children={(isSubmitting) => (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="animate-spin" /> : 'Login'}
+              </Button>
+            )}
+          />
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button">
-            <Github />
-            Login with GitHub
-          </Button>
+          <form.Subscribe
+            selector={(state) => state.isSubmitting}
+            children={(isSubmitting) => (
+              <Button variant="outline" type="button" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Github />
+                )}
+                Masuk dengan GitHub
+              </Button>
+            )}
+          />
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{' '}
+            Tidak punya akun?{' '}
             <a href="/register" className="underline underline-offset-4">
-              Sign up
+              Daftar
             </a>
           </FieldDescription>
         </Field>

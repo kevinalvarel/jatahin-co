@@ -13,7 +13,8 @@ import { useForm } from '@tanstack/react-form'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import { authClient } from '#/lib/auth-client'
-import { Github } from 'lucide-react'
+import { Github, Loader2 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 const formSchema = z.object({
   name: z
@@ -34,6 +35,7 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
+  const navigater = useNavigate()
   const form = useForm({
     defaultValues: {
       name: '',
@@ -49,11 +51,11 @@ export function SignupForm({
           name: value.name,
           email: value.email,
           password: value.password,
-          callbackURL: '/dashboard',
         },
         {
           onSuccess: () => {
             toast.success('Akun berhasil didaftarkan')
+            navigater({ to: '/dashboard' })
           },
           onError: (ctx) => {
             toast.error(ctx.error.message)
@@ -89,15 +91,21 @@ export function SignupForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Nama</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="Kevin Alvarel"
-                  autoComplete="off"
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Kevin Alvarel"
+                      autoComplete="off"
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -112,15 +120,21 @@ export function SignupForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="m@example.com"
-                  autoComplete="off"
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="m@example.com"
+                      autoComplete="off"
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -135,15 +149,21 @@ export function SignupForm({
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  autoComplete="off"
-                  type="password"
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                      type="password"
+                      disabled={isSubmitting}
+                    />
+                  )}
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -151,14 +171,30 @@ export function SignupForm({
           }}
         />
         <Field>
-          <Button type="submit">Daftar</Button>
+          <form.Subscribe
+            selector={(state) => state.isSubmitting}
+            children={(isSubmitting) => (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="animate-spin" /> : 'Daftar'}
+              </Button>
+            )}
+          />
         </Field>
         <FieldSeparator>Atau daftar dengan</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button">
-            <Github />
-            Daftar dengan GitHub
-          </Button>
+          <form.Subscribe
+            selector={(state) => state.isSubmitting}
+            children={(isSubmitting) => (
+              <Button variant="outline" type="button" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Github />
+                )}
+                Daftar dengan GitHub
+              </Button>
+            )}
+          />
           <FieldDescription className="text-center">
             Sudah punya akun?{' '}
             <a href="/login" className="underline underline-offset-4">
