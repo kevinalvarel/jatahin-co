@@ -6,7 +6,7 @@ Aplikasi penghitung jatah pengeluaran harian agar keuangan tetap terkontrol. Dib
 
 | Layer         | Teknologi                    |
 | ------------- | ---------------------------- |
-| Framework     | Next.js (App Router)         |
+| Framework     | Tanstack Start               |
 | Database      | Neon Serverless (PostgreSQL) |
 | ORM           | Drizzle ORM                  |
 | Auth          | Better Auth                  |
@@ -102,20 +102,20 @@ import {
   varchar,
   date,
   timestamp,
-} from "drizzle-orm/pg-core";
-import { user } from "./auth";
+} from 'drizzle-orm/pg-core'
+import { user } from './auth'
 
-export const budgets = pgTable("budgets", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id")
+export const budgets = pgTable('budgets', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id')
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  dailyLimit: numeric("daily_limit", { precision: 12, scale: 2 }).notNull(),
-  currency: varchar("currency", { length: 3 }).default("IDR"),
-  startDate: date("start_date").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+    .references(() => user.id, { onDelete: 'cascade' }),
+  dailyLimit: numeric('daily_limit', { precision: 12, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).default('IDR'),
+  startDate: date('start_date').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
 ```
 
 ### `db/schema/transactions.ts`
@@ -129,21 +129,21 @@ import {
   varchar,
   date,
   timestamp,
-} from "drizzle-orm/pg-core";
-import { user } from "./auth";
+} from 'drizzle-orm/pg-core'
+import { user } from './auth'
 
-export const transactions = pgTable("transactions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id")
+export const transactions = pgTable('transactions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id')
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-  type: varchar("type", { length: 10 }).notNull(), // "expense" | "income"
-  category: varchar("category", { length: 50 }),
-  note: text("note"),
-  date: date("date").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+    .references(() => user.id, { onDelete: 'cascade' }),
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+  type: varchar('type', { length: 10 }).notNull(), // "expense" | "income"
+  category: varchar('category', { length: 50 }),
+  note: text('note'),
+  date: date('date').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+})
 ```
 
 ### `db/schema/daily-summaries.ts`
@@ -158,30 +158,30 @@ import {
   timestamp,
   boolean,
   unique,
-} from "drizzle-orm/pg-core";
-import { user } from "./auth";
+} from 'drizzle-orm/pg-core'
+import { user } from './auth'
 
 export const dailySummaries = pgTable(
-  "daily_summaries",
+  'daily_summaries',
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: text("user_id")
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    date: date("date").notNull(),
-    totalSpent: numeric("total_spent", { precision: 12, scale: 2 }).default(
-      "0",
+      .references(() => user.id, { onDelete: 'cascade' }),
+    date: date('date').notNull(),
+    totalSpent: numeric('total_spent', { precision: 12, scale: 2 }).default(
+      '0',
     ),
-    totalIncome: numeric("total_income", { precision: 12, scale: 2 }).default(
-      "0",
+    totalIncome: numeric('total_income', { precision: 12, scale: 2 }).default(
+      '0',
     ),
-    dailyLimit: numeric("daily_limit", { precision: 12, scale: 2 }).notNull(),
-    isOver: boolean("is_over").default(false),
+    dailyLimit: numeric('daily_limit', { precision: 12, scale: 2 }).notNull(),
+    isOver: boolean('is_over').default(false),
   },
   (t) => ({
     unq: unique().on(t.userId, t.date),
   }),
-);
+)
 ```
 
 ---
@@ -191,38 +191,38 @@ export const dailySummaries = pgTable(
 ### `lib/validations/budget.ts`
 
 ```ts
-import { z } from "zod";
+import { z } from 'zod'
 
 export const createBudgetSchema = z.object({
   dailyLimit: z
-    .number({ required_error: "Jatah harian wajib diisi" })
-    .positive("Jatah harian harus lebih dari 0")
-    .max(100_000_000, "Maksimal 100 juta per hari"),
-  currency: z.string().length(3).default("IDR"),
+    .number({ required_error: 'Jatah harian wajib diisi' })
+    .positive('Jatah harian harus lebih dari 0')
+    .max(100_000_000, 'Maksimal 100 juta per hari'),
+  currency: z.string().length(3).default('IDR'),
   startDate: z.coerce.date(),
-});
+})
 
-export type CreateBudgetInput = z.infer<typeof createBudgetSchema>;
+export type CreateBudgetInput = z.infer<typeof createBudgetSchema>
 ```
 
 ### `lib/validations/transaction.ts`
 
 ```ts
-import { z } from "zod";
+import { z } from 'zod'
 
 export const createTransactionSchema = z.object({
   amount: z
-    .number({ required_error: "Nominal wajib diisi" })
-    .positive("Nominal harus lebih dari 0"),
-  type: z.enum(["expense", "income"], {
-    required_error: "Tipe transaksi wajib dipilih",
+    .number({ required_error: 'Nominal wajib diisi' })
+    .positive('Nominal harus lebih dari 0'),
+  type: z.enum(['expense', 'income'], {
+    required_error: 'Tipe transaksi wajib dipilih',
   }),
-  category: z.string().min(1, "Kategori wajib dipilih").max(50),
+  category: z.string().min(1, 'Kategori wajib dipilih').max(50),
   note: z.string().max(255).optional(),
   date: z.coerce.date(),
-});
+})
 
-export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
 ```
 
 ---

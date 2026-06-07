@@ -16,16 +16,27 @@ import { authClient } from '#/lib/auth-client'
 import { Github } from 'lucide-react'
 
 const formSchema = z.object({
-  email: z.email('Email tidak sesuai'),
-  password: z.string().min(1, 'Password tidak boleh kosong'),
+  name: z
+    .string()
+    .min(1, 'Nama tidak boleh kosong')
+    .max(50, 'Nama maksimal 50 karakter'),
+  email: z.email('Email tidak sesuai').max(50, 'Email maksimal 50 karakter'),
+  password: z
+    .string()
+    .min(8, 'Password minimal 8 karakter')
+    .max(50, 'Password maksimal 50 karakter')
+    .regex(/[A-Z]/, 'Password harus mengandung setidaknya satu huruf besar')
+    .regex(/[a-z]/, 'Password harus mengandung setidaknya satu huruf kecil')
+    .regex(/[0-9]/, 'Password harus mengandung setidaknya satu angka'),
 })
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
   const form = useForm({
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
@@ -33,15 +44,16 @@ export function LoginForm({
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      await authClient.signIn.email(
+      await authClient.signUp.email(
         {
+          name: value.name,
           email: value.email,
           password: value.password,
           callbackURL: '/dashboard',
         },
         {
           onSuccess: () => {
-            toast.success('Berhasil Masuk')
+            toast.success('Akun berhasil didaftarkan')
           },
           onError: (ctx) => {
             toast.error(ctx.error.message)
@@ -53,7 +65,7 @@ export function LoginForm({
 
   return (
     <form
-      id="login-form"
+      id="signup-form"
       onSubmit={(e) => {
         e.preventDefault()
         form.handleSubmit()
@@ -63,12 +75,35 @@ export function LoginForm({
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Daftarkan Akun Anda</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
+            Masukan Email Anda di bawah untuk mendaftarkan akun
           </p>
         </div>
 
+        <form.Field
+          name="name"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Nama</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="Kevin Alvarel"
+                  autoComplete="off"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        />
         <form.Field
           name="email"
           children={(field) => {
@@ -116,18 +151,18 @@ export function LoginForm({
           }}
         />
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit">Daftar</Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>Atau daftar dengan</FieldSeparator>
         <Field>
           <Button variant="outline" type="button">
             <Github />
-            Login with GitHub
+            Daftar dengan GitHub
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{' '}
-            <a href="/register" className="underline underline-offset-4">
-              Sign up
+            Sudah punya akun?{' '}
+            <a href="/login" className="underline underline-offset-4">
+              Masuk
             </a>
           </FieldDescription>
         </Field>
