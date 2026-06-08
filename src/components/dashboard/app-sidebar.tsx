@@ -2,14 +2,11 @@ import * as React from 'react'
 import {
   IconDashboard,
   IconDatabase,
-  IconFileWord,
-  IconHelp,
   IconReport,
   IconSearch,
   IconSettings,
 } from '@tabler/icons-react'
 
-import { NavDocuments } from '#/components/dashboard/nav-documents'
 import { NavMain } from '#/components/dashboard/nav-main'
 import { NavSecondary } from '#/components/dashboard/nav-secondary'
 import { NavUser } from '#/components/dashboard/nav-user'
@@ -22,13 +19,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '#/components/ui/sidebar.tsx'
+import { authClient } from '#/lib/auth-client'
 
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
+const navigationData = {
   navMain: [
     {
       title: 'Dashboard',
@@ -62,7 +55,16 @@ const data = {
   ],
 }
 
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = authClient.useSession()
+
+  const user = {
+    name: session?.user.name ?? '',
+    email: session?.user.email ?? '',
+    avatar: session?.user.image ?? (session?.user.name ? session.user.name.split('')[0] : ''),
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -81,12 +83,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navigationData.navMain} />
+        <NavSecondary items={navigationData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

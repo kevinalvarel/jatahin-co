@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '#/components/ui/card.tsx'
 import type { Budget } from '#/server/budget'
+import type { Transaction } from '#/server/transaction'
 
 const GOAL_LABELS: Record<string, string> = {
   aggressive: 'Hemat',
@@ -66,9 +67,10 @@ function formatDate(dateStr: string) {
 
 interface SectionCardsProps {
   budget: Budget | null
+  transactions: Transaction[] | null
 }
 
-export function SectionCards({ budget }: SectionCardsProps) {
+export function SectionCards({ budget, transactions }: SectionCardsProps) {
   if (!budget) {
     return (
       <div className="px-4 lg:px-6">
@@ -92,6 +94,12 @@ export function SectionCards({ budget }: SectionCardsProps) {
   const categoryLabels = budget.priorityCategories
     .map((c) => CATEGORY_LABELS[c] ?? c)
     .join(', ')
+
+  const totalSpent = (transactions ?? [])
+    .filter((tx) => tx.type === 'expense' && tx.date >= budget.startDate)
+    .reduce((acc, tx) => acc + Number(tx.amount), 0)
+
+  const remainingBudget = Number(budget.dailyLimit) - totalSpent
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
@@ -118,31 +126,27 @@ export function SectionCards({ budget }: SectionCardsProps) {
         </CardFooter>
       </Card>
 
-      {/* Tujuan Finansial */}
+      {/* Sisa Budget */}
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Tujuan Finansial</CardDescription>
-          <CardTitle className="text-2xl font-semibold @[250px]/card:text-3xl">
-            {goalLabel}
+          <CardDescription>Sisa Budget</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {formatRupiah(remainingBudget)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
               <IconTarget className={goalColor} />
-              {budget.financialGoal}
+              {goalLabel}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            {budget.financialGoal === 'aggressive'
-              ? 'Mode hemat aktif'
-              : budget.financialGoal === 'relaxed'
-                ? 'Mode santai aktif'
-                : 'Mode seimbang aktif'}{' '}
+            {remainingBudget < 0 ? 'Budget melebihi limit!' : 'Budget aman'}{' '}
             <IconScale className="size-4" />
           </div>
           <div className="text-muted-foreground">
-            Mengatur tingkat pengeluaran
+            Terpakai {formatRupiah(totalSpent)} dari total budget
           </div>
         </CardFooter>
       </Card>

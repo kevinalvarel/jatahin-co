@@ -85,7 +85,7 @@ export function OutcomeModal({ open, onOpenChange }: OutcomeModalProps) {
     setDate(new Date().toISOString().split('T')[0])
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
     if (isSubmitting) return
 
