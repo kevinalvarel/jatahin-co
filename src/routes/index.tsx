@@ -32,11 +32,9 @@ function Home() {
         menuButtonColor="#060a12"
         openMenuButtonColor="#060a12"
         changeMenuColorOnOpen={true}
-        colors={['#B497CF', '#5227FF']}
+        colors={['#c96442', '#c96442']}
         logoUrl="/logo.png"
-        accentColor="#5227FF"
-        onMenuOpen={() => console.log('Menu opened')}
-        onMenuClose={() => console.log('Menu closed')}
+        accentColor="#c96442"
       />
 
       {/* Hero section — self-contained stacking context */}

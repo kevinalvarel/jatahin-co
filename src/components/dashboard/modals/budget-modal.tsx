@@ -97,7 +97,9 @@ export function BudgetModal({ open, onOpenChange, budget }: BudgetModalProps) {
 
   const [dailyLimit, setDailyLimit] = React.useState('')
   const [startDate, setStartDate] = React.useState('')
-  const [financialGoal, setFinancialGoal] = React.useState(DEFAULT_FINANCIAL_GOAL)
+  const [financialGoal, setFinancialGoal] = React.useState(
+    DEFAULT_FINANCIAL_GOAL,
+  )
   const [incomeType, setIncomeType] = React.useState(DEFAULT_INCOME_TYPE)
   const [priorityCategories, setPriorityCategories] = React.useState<string[]>(
     DEFAULT_PRIORITY_CATEGORIES,
@@ -111,7 +113,9 @@ export function BudgetModal({ open, onOpenChange, budget }: BudgetModalProps) {
       setStartDate(budget.startDate ?? '')
       setFinancialGoal(budget.financialGoal ?? DEFAULT_FINANCIAL_GOAL)
       setIncomeType(budget.incomeType ?? DEFAULT_INCOME_TYPE)
-      setPriorityCategories(budget.priorityCategories ?? DEFAULT_PRIORITY_CATEGORIES)
+      setPriorityCategories(
+        budget.priorityCategories ?? DEFAULT_PRIORITY_CATEGORIES,
+      )
     } else if (open && !budget) {
       handleReset()
     }
@@ -126,7 +130,7 @@ export function BudgetModal({ open, onOpenChange, budget }: BudgetModalProps) {
   }
 
   function formatCurrency(value: string) {
-    const num = value.replace(/\D/g, '')
+    const num = parseInt(value)
     if (!num) return ''
     return new Intl.NumberFormat('id-ID').format(Number(num))
   }

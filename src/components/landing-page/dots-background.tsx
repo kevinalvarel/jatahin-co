@@ -30,7 +30,7 @@ interface DotFieldProps {
 }
 
 const DotsBackground = memo(({
-    dotRadius = 1.5,
+    dotRadius = 2.5,
     dotSpacing = 14,
     cursorRadius = 500,
     cursorForce = 0.1,
