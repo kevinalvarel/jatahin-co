@@ -1,7 +1,12 @@
 'use client'
 
 import * as React from 'react'
-import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react'
+import {
+  IconCirclePlusFilled,
+  IconEdit,
+  IconMail,
+  type Icon,
+} from '@tabler/icons-react'
 
 import { BudgetModal } from '#/components/dashboard/modals/budget-modal'
 import { Button } from '#/components/ui/button.tsx'
@@ -12,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '#/components/ui/sidebar.tsx'
+import { type Budget, getUserBudget } from '#/server/budget'
 
 export function NavMain({
   items,
@@ -23,6 +29,35 @@ export function NavMain({
   }[]
 }) {
   const [budgetModalOpen, setBudgetModalOpen] = React.useState(false)
+  const [budget, setBudget] = React.useState<Budget | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  // Fetch current budget on mount
+  React.useEffect(() => {
+    async function fetchBudget() {
+      try {
+        const data = await getUserBudget()
+        setBudget(data)
+      } catch {
+        setBudget(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBudget()
+  }, [])
+
+  // Re-fetch budget when modal closes (captures create/edit changes)
+  function handleModalChange(open: boolean) {
+    setBudgetModalOpen(open)
+    if (!open) {
+      getUserBudget()
+        .then((data) => setBudget(data))
+        .catch(() => setBudget(null))
+    }
+  }
+
+  const hasBudget = Boolean(budget)
 
   return (
     <SidebarGroup>
@@ -30,12 +65,17 @@ export function NavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Buat Budget"
+              tooltip={hasBudget ? 'Edit Budget' : 'Buat Budget'}
               onClick={() => setBudgetModalOpen(true)}
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+              disabled={isLoading}
+              className={`min-w-8 duration-200 ease-linear ${
+                hasBudget
+                  ? 'bg-chart-2 text-white hover:bg-chart-2/90 hover:text-white active:bg-chart-2/90 active:text-white'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground'
+              }`}
             >
-              <IconCirclePlusFilled />
-              <span>Buat Budget</span>
+              {hasBudget ? <IconEdit /> : <IconCirclePlusFilled />}
+              <span>{hasBudget ? 'Edit Budget' : 'Buat Budget'}</span>
             </SidebarMenuButton>
             <Button
               size="icon"
@@ -59,7 +99,11 @@ export function NavMain({
         </SidebarMenu>
       </SidebarGroupContent>
 
-      <BudgetModal open={budgetModalOpen} onOpenChange={setBudgetModalOpen} />
+      <BudgetModal
+        open={budgetModalOpen}
+        onOpenChange={handleModalChange}
+        budget={budget}
+      />
     </SidebarGroup>
   )
 }

@@ -20,7 +20,6 @@ import {
 } from '#/components/ui/dialog.tsx'
 import { Separator } from '#/components/ui/separator.tsx'
 
-// ─── Types ───────────────────────────────────────────────────────────
 interface Notification {
   id: string
   title: string
@@ -30,7 +29,6 @@ interface Notification {
   read: boolean
 }
 
-// ─── Dummy Data ──────────────────────────────────────────────────────
 const DUMMY_NOTIFICATIONS: Notification[] = [
   {
     id: '1',
@@ -82,7 +80,6 @@ const DUMMY_NOTIFICATIONS: Notification[] = [
   },
 ]
 
-// ─── Style Map ───────────────────────────────────────────────────────
 const TYPE_CONFIG = {
   insight: {
     icon: IconChartBar,
@@ -118,7 +115,6 @@ const TYPE_CONFIG = {
   },
 } as const
 
-// ─── Helpers ─────────────────────────────────────────────────────────
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
   const now = new Date()
@@ -136,7 +132,7 @@ function formatDate(dateStr: string): string {
   })
 }
 
-// ─── Notification Card ───────────────────────────────────────────────
+
 function NotificationCard({
   notification,
   index,
@@ -155,13 +151,11 @@ function NotificationCard({
       style={{ animationDelay: `${index * 60}ms`, animationDuration: '350ms' }}
     >
       <div
-        className={`relative overflow-hidden rounded-xl border border-l-[3px] ${config.accentBorder} transition-all duration-200 hover:shadow-md ${
-          notification.read
-            ? 'bg-card/50 opacity-75 hover:opacity-100'
-            : 'bg-card shadow-sm'
-        }`}
+        className={`relative overflow-hidden rounded-xl border border-l-[3px] ${config.accentBorder} transition-all duration-200 hover:shadow-md ${notification.read
+          ? 'bg-card/50 opacity-75 hover:opacity-100'
+          : 'bg-card shadow-sm'
+          }`}
       >
-        {/* Subtle gradient background */}
         <div
           className={`pointer-events-none absolute inset-0 bg-gradient-to-r ${config.gradient}`}
         />
@@ -178,11 +172,10 @@ function NotificationCard({
             <div className="min-w-0 flex-1">
               <div className="mb-0.5 flex items-center gap-2">
                 <h3
-                  className={`text-sm leading-snug font-semibold truncate ${
-                    notification.read
-                      ? 'text-foreground/70'
-                      : 'text-foreground'
-                  }`}
+                  className={`text-sm leading-snug font-semibold truncate ${notification.read
+                    ? 'text-foreground/70'
+                    : 'text-foreground'
+                    }`}
                 >
                   {notification.title}
                 </h3>
@@ -192,11 +185,10 @@ function NotificationCard({
               </div>
 
               <p
-                className={`text-[13px] leading-relaxed ${
-                  notification.read
-                    ? 'text-muted-foreground/70'
-                    : 'text-muted-foreground'
-                }`}
+                className={`text-[13px] leading-relaxed ${notification.read
+                  ? 'text-muted-foreground/70'
+                  : 'text-muted-foreground'
+                  }`}
               >
                 {notification.body}
               </p>

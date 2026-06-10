@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { db } from '#/db/drizzle'
 import { budgets } from '#/db/schemas/budgets-schema'
 import { auth } from '#/lib/auth'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and } from 'drizzle-orm'
 
 const createBudgetSchema = z.object({
   dailyLimit: z
@@ -24,7 +24,12 @@ const createBudgetSchema = z.object({
     .min(1, 'Pilih minimal 1 kategori prioritas'),
 })
 
+const editBudgetSchema = createBudgetSchema.extend({
+  budgetId: z.uuid('ID budget tidak valid'),
+})
+
 export type CreateBudgetInput = z.infer<typeof createBudgetSchema>
+export type EditBudgetInput = z.infer<typeof editBudgetSchema>
 
 export type Budget = typeof budgets.$inferSelect
 
@@ -80,7 +85,7 @@ export const getUserBudget = createServerFn({ method: 'GET' }).handler(
 
 export const deleteBudget = createServerFn({ method: 'POST' })
   .validator((data: { budgetId: string }) =>
-    z.object({ budgetId: z.string().uuid() }).parse(data),
+    z.object({ budgetId: z.uuid() }).parse(data),
   )
   .handler(async ({ data }) => {
     const request = getRequest()
@@ -101,4 +106,42 @@ export const deleteBudget = createServerFn({ method: 'POST' })
     }
 
     return { success: true }
+  })
+
+export const editUserBudget = createServerFn({ method: 'POST' })
+  .validator((data: EditBudgetInput) => editBudgetSchema.parse(data))
+  .handler(async ({ data }) => {
+    const request = getRequest()
+    const session = await auth.api.getSession({
+      headers: request!.headers,
+    })
+
+    if (!session) {
+      throw new Error('Unauthorized')
+    }
+
+    const userId = session.user.id
+    const { budgetId, ...updateData } = data
+    const [updatedBudget] = await db
+      .update(budgets)
+      .set({
+        dailyLimit: updateData.dailyLimit,
+        startDate: updateData.startDate,
+        financialGoal: updateData.financialGoal,
+        incomeType: updateData.incomeType,
+        priorityCategories: updateData.priorityCategories,
+      })
+      .where(
+        and(
+          eq(budgets.id, budgetId),
+          eq(budgets.userId, userId)
+        )
+      )
+      .returning()
+
+    if (!updatedBudget) {
+      throw new Error('Budget tidak ditemukan atau Anda tidak memiliki akses')
+    }
+
+    return updatedBudget
   })

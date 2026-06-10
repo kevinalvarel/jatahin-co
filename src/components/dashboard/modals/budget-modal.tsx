@@ -4,6 +4,7 @@ import * as React from 'react'
 import {
   IconCalendar,
   IconCoinFilled,
+  IconEdit,
   IconLoader2,
   IconScale,
   IconSparkles,
@@ -55,7 +56,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react'
 
-import { createBudget } from '#/server/budget'
+import { type Budget, createBudget, editUserBudget } from '#/server/budget'
 
 const FINANCIAL_GOALS = [
   { value: 'aggressive', label: 'Hemat', emoji: <Flame /> },
@@ -79,22 +80,42 @@ const PRIORITY_CATEGORIES = [
   { value: 'lainnya', label: 'Lainnya', emoji: <Package /> },
 ] as const
 
+// ─── Default values ──────────────────────────────────────────────────
+const DEFAULT_FINANCIAL_GOAL = 'balanced'
+const DEFAULT_INCOME_TYPE = 'monthly'
+const DEFAULT_PRIORITY_CATEGORIES = ['makan', 'transport']
+
 interface BudgetModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  budget?: Budget | null
 }
 
-export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
+export function BudgetModal({ open, onOpenChange, budget }: BudgetModalProps) {
   const router = useRouter()
+  const isEditMode = Boolean(budget)
+
   const [dailyLimit, setDailyLimit] = React.useState('')
   const [startDate, setStartDate] = React.useState('')
-  const [financialGoal, setFinancialGoal] = React.useState('balanced')
-  const [incomeType, setIncomeType] = React.useState('monthly')
-  const [priorityCategories, setPriorityCategories] = React.useState<string[]>([
-    'makan',
-    'transport',
-  ])
+  const [financialGoal, setFinancialGoal] = React.useState(DEFAULT_FINANCIAL_GOAL)
+  const [incomeType, setIncomeType] = React.useState(DEFAULT_INCOME_TYPE)
+  const [priorityCategories, setPriorityCategories] = React.useState<string[]>(
+    DEFAULT_PRIORITY_CATEGORIES,
+  )
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  // Populate form fields when the modal opens in edit mode
+  React.useEffect(() => {
+    if (open && budget) {
+      setDailyLimit(budget.dailyLimit ?? '')
+      setStartDate(budget.startDate ?? '')
+      setFinancialGoal(budget.financialGoal ?? DEFAULT_FINANCIAL_GOAL)
+      setIncomeType(budget.incomeType ?? DEFAULT_INCOME_TYPE)
+      setPriorityCategories(budget.priorityCategories ?? DEFAULT_PRIORITY_CATEGORIES)
+    } else if (open && !budget) {
+      handleReset()
+    }
+  }, [open, budget])
 
   function handleCategoryToggle(category: string) {
     setPriorityCategories((prev) =>
@@ -121,30 +142,44 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
     if (isSubmitting) return
     setIsSubmitting(true)
 
-    try {
-      await createBudget({
-        data: {
-          dailyLimit,
-          startDate,
-          financialGoal: financialGoal as 'aggressive' | 'balanced' | 'relaxed',
-          incomeType: incomeType as 'monthly' | 'freelance' | 'daily',
-          priorityCategories,
-        },
-      })
+    const budgetPayload = {
+      dailyLimit,
+      startDate,
+      financialGoal: financialGoal as 'aggressive' | 'balanced' | 'relaxed',
+      incomeType: incomeType as 'monthly' | 'freelance' | 'daily',
+      priorityCategories,
+    }
 
-      toast.success('Budget berhasil disimpan!', {
-        description: `Budget Rp ${formatCurrency(dailyLimit)} mulai berlaku ${startDate}`,
-      })
+    try {
+      if (isEditMode && budget) {
+        // Use budget.id as budgetId; the server also verifies userId ownership
+        await editUserBudget({
+          data: {
+            budgetId: budget.id,
+            ...budgetPayload,
+          },
+        })
+
+        toast.success('Budget berhasil diperbarui!', {
+          description: `Budget Rp ${formatCurrency(dailyLimit)} mulai berlaku ${startDate}`,
+        })
+      } else {
+        await createBudget({ data: budgetPayload })
+
+        toast.success('Budget berhasil disimpan!', {
+          description: `Budget Rp ${formatCurrency(dailyLimit)} mulai berlaku ${startDate}`,
+        })
+      }
 
       handleReset()
       onOpenChange(false)
-
-      // Refresh route data so dashboard cards show updated budget
       router.invalidate()
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Gagal menyimpan budget'
-      toast.error('Gagal menyimpan budget', { description: message })
+      const fallbackMsg = isEditMode
+        ? 'Gagal memperbarui budget'
+        : 'Gagal menyimpan budget'
+      const message = error instanceof Error ? error.message : fallbackMsg
+      toast.error(fallbackMsg, { description: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -153,27 +188,46 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
   function handleReset() {
     setDailyLimit('')
     setStartDate('')
-    setFinancialGoal('balanced')
-    setIncomeType('monthly')
-    setPriorityCategories(['makan', 'transport'])
+    setFinancialGoal(DEFAULT_FINANCIAL_GOAL)
+    setIncomeType(DEFAULT_INCOME_TYPE)
+    setPriorityCategories(DEFAULT_PRIORITY_CATEGORIES)
   }
+
+  // ─── Dynamic text / icons based on mode ────────────────────────────
+  const headerTitle = isEditMode ? 'Edit Budget' : 'Buat Budget Baru'
+  const headerDescription = isEditMode
+    ? 'Perbarui anggaran dan prioritas pengeluaranmu'
+    : 'Atur anggaran harian dan prioritas pengeluaranmu'
+  const submitLabel = isEditMode ? 'Perbarui Budget' : 'Simpan Budget'
+  const submittingLabel = isEditMode ? 'Memperbarui...' : 'Menyimpan...'
+  const HeaderIcon = isEditMode ? IconEdit : IconWallet
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[520px] p-0 gap-0 overflow-hidden">
         {/* Header gradient accent */}
         <div className="relative px-6 pt-6 pb-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-chart-1/[0.06]" />
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${
+              isEditMode
+                ? 'from-chart-2/[0.06] via-transparent to-chart-3/[0.04]'
+                : 'from-primary/[0.04] via-transparent to-chart-1/[0.06]'
+            }`}
+          />
           <DialogHeader className="relative">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <IconWallet className="size-5" />
+              <div
+                className={`flex size-10 items-center justify-center rounded-xl ${
+                  isEditMode
+                    ? 'bg-chart-2/10 text-chart-2'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                <HeaderIcon className="size-5" />
               </div>
               <div className="flex flex-col gap-1">
-                <DialogTitle className="text-lg">Buat Budget Baru</DialogTitle>
-                <DialogDescription>
-                  Atur anggaran harian dan prioritas pengeluaranmu
-                </DialogDescription>
+                <DialogTitle className="text-lg">{headerTitle}</DialogTitle>
+                <DialogDescription>{headerDescription}</DialogDescription>
               </div>
             </div>
           </DialogHeader>
@@ -358,9 +412,9 @@ export function BudgetModal({ open, onOpenChange }: BudgetModalProps) {
                   data-icon="inline-start"
                 />
               ) : (
-                <IconWallet data-icon="inline-start" />
+                <HeaderIcon data-icon="inline-start" />
               )}
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Budget'}
+              {isSubmitting ? submittingLabel : submitLabel}
             </Button>
           </DialogFooter>
         </form>
