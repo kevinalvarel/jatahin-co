@@ -1,3 +1,4 @@
+import { AboutDetail } from '#/components/landing-page/about-detail'
 import StaggeredMenu from '#/components/landing-page/animated-navbar'
 import DotsBackground from '#/components/landing-page/dots-background'
 import { SquigglyText } from '#/components/landing-page/squiggly-text'
@@ -19,7 +20,8 @@ const actionButtons = [
 
 function Home() {
   return (
-    <div className="w-full h-dvh relative">
+    <div className="w-full">
+      {/* Navbar — fixed, always on top */}
       <StaggeredMenu
         position="right"
         isFixed={true}
@@ -36,29 +38,40 @@ function Home() {
         onMenuOpen={() => console.log('Menu opened')}
         onMenuClose={() => console.log('Menu closed')}
       />
-      <DotsBackground glowRadius={0} />
-      <div className='absolute inset-0 flex flex-col items-center justify-center'>
-        <h1 className="text-center text-5xl leading-tight font-bold text-neutral-900 md:text-7xl lg:text-8xl dark:text-neutral-100">
-          Jatahin {""}
-          <SquigglyText
-            stepDuration={70}
-            scale={[6, 9]}
-            className="text-primary"
-          >
-            uangmu
-          </SquigglyText>{" "}
-          <br />
-          demi {""}
-          <SquigglyText
-            className='text-primary'
-            stepDuration={70}
-            scale={[6, 9]}
-          >masa </SquigglyText> {""} depanmu
-        </h1>
-      </div>
-      <div className='h-screen'>
-        Helloo
-      </div>
+
+      {/* Hero section — self-contained stacking context */}
+      <section className="relative h-dvh w-full overflow-hidden">
+        {/* Dots background: purely decorative, never blocks pointer events */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <DotsBackground glowRadius={0} />
+        </div>
+
+        {/* Hero text — sits above dots, below navbar */}
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+          <h1 className="text-center text-5xl leading-tight font-bold text-neutral-900 md:text-7xl lg:text-8xl dark:text-neutral-100">
+            Jatahin {""}
+            <SquigglyText
+              stepDuration={70}
+              scale={[6, 9]}
+              className="text-primary"
+            >
+              uangmu
+            </SquigglyText>{" "}
+            <br />
+            demi {""}
+            <SquigglyText
+              className='text-primary'
+              stepDuration={70}
+              scale={[6, 9]}
+            >masa </SquigglyText> {""} depanmu
+          </h1>
+        </div>
+      </section>
+
+      {/* About section — normal flow, fully interactive */}
+      <section className="relative z-10 w-full">
+        <AboutDetail />
+      </section>
     </div>
   )
 }
