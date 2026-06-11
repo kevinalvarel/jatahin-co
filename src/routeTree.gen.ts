@@ -15,6 +15,7 @@ import { Route as dashboardDashboardRouteImport } from './routes/(dashboard)/das
 import { Route as dashboardBudgetRouteImport } from './routes/(dashboard)/budget'
 import { Route as authRegisterRouteImport } from './routes/(auth)/register'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
+import { Route as ApiChatSplatRouteImport } from './routes/api/chat/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const dashboardRouteRoute = dashboardRouteRouteImport.update({
@@ -46,6 +47,11 @@ const authLoginRoute = authLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatSplatRoute = ApiChatSplatRouteImport.update({
+  id: '/api/chat/$',
+  path: '/api/chat/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/budget': typeof dashboardBudgetRoute
   '/dashboard': typeof dashboardDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/budget': typeof dashboardBudgetRoute
   '/dashboard': typeof dashboardDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/(dashboard)/budget': typeof dashboardBudgetRoute
   '/(dashboard)/dashboard': typeof dashboardDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,8 +96,16 @@ export interface FileRouteTypes {
     | '/budget'
     | '/dashboard'
     | '/api/auth/$'
+    | '/api/chat/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/budget' | '/dashboard' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/budget'
+    | '/dashboard'
+    | '/api/auth/$'
+    | '/api/chat/$'
   id:
     | '__root__'
     | '/'
@@ -98,6 +115,7 @@ export interface FileRouteTypes {
     | '/(dashboard)/budget'
     | '/(dashboard)/dashboard'
     | '/api/auth/$'
+    | '/api/chat/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +124,7 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiChatSplatRoute: typeof ApiChatSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/$': {
+      id: '/api/chat/$'
+      path: '/api/chat/$'
+      fullPath: '/api/chat/$'
+      preLoaderRoute: typeof ApiChatSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -182,6 +208,7 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiChatSplatRoute: ApiChatSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
