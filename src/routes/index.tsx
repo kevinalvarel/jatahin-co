@@ -2,6 +2,7 @@ import { AboutDetail } from '#/components/landing-page/about-detail'
 import StaggeredMenu from '#/components/landing-page/animated-navbar'
 import DotsBackground from '#/components/landing-page/dots-background'
 import { FaqSection } from '#/components/landing-page/faq-section'
+import { Footer } from '#/components/landing-page/footer'
 import Orb from '#/components/landing-page/orb-background'
 import { SquigglyText } from '#/components/landing-page/squiggly-text'
 import { createFileRoute } from '@tanstack/react-router'
@@ -10,9 +11,9 @@ export const Route = createFileRoute('/')({ component: Home })
 
 const menuItems = [
   { label: 'Home', ariaLabel: 'Homepage', link: '/' },
-  { label: 'About', ariaLabel: 'About', link: '/about' },
-  { label: 'Services', ariaLabel: 'Services', link: '/services' },
-  { label: 'Contact', ariaLabel: 'Contact', link: '/contact' },
+  { label: 'About', ariaLabel: 'About', link: '#about' },
+  { label: 'FAQ', ariaLabel: 'FAQ', link: '#faq' },
+  { label: 'Contact', ariaLabel: 'Contact', link: '#contact' },
 ]
 
 const actionButtons = [{ label: 'Mulai', ariaLabel: 'Mulai', link: '/login' }]
@@ -101,6 +102,8 @@ function Home() {
           </h2>
         </div>
       </section>
+
+      <Footer />
     </div>
   )
 }
